@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>יומן אימון Bench Press</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-flat: #38bdf8;
+            --accent-incline: #f43f5e;
+            --accent-max: #10b981;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin: 0 0 5px 0;
+            background: linear-gradient(to left, var(--accent-flat), var(--accent-incline));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* כרטיסי שיאים עליונים */
+        .records-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .record-card {
+            flex: 1;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+        .record-card.flat { border-top: 3px solid var(--accent-flat); }
+        .record-card.incline { border-top: 3px solid var(--accent-incline); }
+
+        .record-title { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+        .record-value { font-size: 1.3rem; font-weight: bold; }
+        .record-value span { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* טופס האימון המאוחד */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .title-flat { color: var(--accent-flat); }
+        .title-incline { color: var(--accent-incline); }
+        .title-max { color: var(--accent-max); }
+
+        .inputs-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        input:focus { outline: none; border-color: #64748b; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.05rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+            margin-top: 5px;
+        }
+        .submit-btn:active { transform: scale(0.99); }
+
+        /* היסטוריה במבנה של אימונים מלאים */
+        .history-title {
+            font-size: 1.2rem;
+            margin: 10px 0 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .clear-btn { background: transparent; border: none; color: var(--accent-incline); cursor: pointer; font-size: 0.85rem; }
+
+        .workout-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 15px;
+        }
+
+        .workout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .workout-date { font-weight: bold; color: var(--text-main); }
+
+        .exercise-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 0.95rem;
+        }
+
+        .exercise-name { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .dot-flat { background-color: var(--accent-flat); }
+        .dot-incline { background-color: var(--accent-incline); }
+        .dot-max { background-color: var(--accent-max); }
+
+        .exercise-result { font-weight: bold; }
+        .exercise-result span { font-size: 0.8rem; color: var(--text-muted); font-weight: normal; }
+
+        .empty-state { text-align: center; color: var(--text-muted); padding: 30px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>TRACK & GAIN</h1>
+        <p>יומן אימוני Bench Press מאוחד</p>
+    </header>
+
+    <div class="records-container">
+        <div class="record-card flat">
+            <div class="record-title">שיא 1RM (רגיל)</div>
+            <div class="record-value" id="maxFlat">0 <span>ק"ג</span></div>
+        </div>
+        <div class="record-card incline">
+            <div class="record-title">שיא 1RM (חיובי)</div>
+            <div class="record-value" id="maxIncline">0 <span>ק"ג</span></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <form id="workoutForm" onsubmit="event.preventDefault();">
+            
+            <div class="section-title title-flat">● שיפוע רגיל (Flat Bench)</div>
+            <div class="inputs-row">
+                <div class="form-group">
+                    <label>משקל (ק"ג)</label>
+                    <input type="number" id="flatWeight" placeholder="ללא" min="0" step="0.5" inputmode="decimal">
+                </div>
+                <div class="form-group">
+                    <label>חזרות</label>
+                    <input type="number" id="flatReps" placeholder="ללא" min="0" inputmode="numeric">
+                </div>
+            </div>
+
+            <div class="section-title title-incline">● שיפוע חיובי (Incline Bench)</div>
+            <div class="inputs-row">
+                <div class="form-group">
+                    <label>משקל (ק"ג)</label>
+                    <input type="number" id="incWeight" placeholder="ללא" min="0" step="0.5" inputmode="decimal">
+                </div>
+                <div class="form-group">
+                    <label>חזרות</label>
+                    <input type="number" id="incReps" placeholder="ללא" min="0" inputmode="numeric">
+                </div>
+            </div>
+
+            <div class="section-title title-max">🔥 בדיקת חזרה אחת (1RM)</div>
+            <div class="inputs-row">
+                <div class="form-group">
+                    <label>משקל מקסימלי בשיפוע רגיל</label>
+                    <input type="number" id="maxFlatInput" placeholder="ללא" min="0" step="0.5" inputmode="decimal">
+                </div>
+                <div class="form-group">
+                    <label>משקל מקסימלי בשיפוע חיובי</label>
+                    <input type="number" id="maxIncInput" placeholder="ללא" min="0" step="0.5" inputmode="decimal">
+                </div>
+            </div>
+
+            <button type="button" class="submit-btn" onclick="saveWorkout()">סכם ותעד אימון 💪</button>
+        </form>
+    </div>
+
+    <div class="history-title">
+        <span>היסטוריית אימונים</span>
+        <button class="clear-btn" onclick="clearAll()">מחק הכל</button>
+    </div>
+    
+    <div id="logsContainer"></div>
+</div>
+
+<script>
+    let db;
+
+    // אתחול מסד נתונים פנימי ל-Koder
+    const request = indexedDB.open("GymSessionsDB", 1);
+    request.onupgradeneeded = function(e) {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains("workouts")) {
+            db.createObjectStore("workouts", { keyPath: "id" });
+        }
+    };
+    request.onsuccess = function(e) {
+        db = e.target.result;
+        loadData();
+    };
+
+    function calculate1RM(weight, reps) {
+        if (!weight || !reps) return 0;
+        if (parseInt(reps) === 1) return parseFloat(weight);
+        return parseFloat(weight) * (1 + parseInt(reps) / 30);
+    }
+
+    function saveWorkout() {
+        // קריאת נתונים מהטופס
+        const flatW = parseFloat(document.getElementById('flatWeight').value) || 0;
+        const flatR = parseInt(document.getElementById('flatReps').value) || 0;
+        const incW = parseFloat(document.getElementById('incWeight').value) || 0;
+        const incR = parseInt(document.getElementById('incReps').value) || 0;
+        const maxFlatVal = parseFloat(document.getElementById('maxFlatInput').value) || 0;
+        const maxIncVal = parseFloat(document.getElementById('maxIncInput').value) || 0;
+
+        // בדיקה שלא הכל ריק
+        if (!flatW && !incW && !maxFlatVal && !maxIncVal) {
+            alert('אחי, תכניס לפחות נתון אחד כדי לתעד אימון!');
+            return;
+        }
+
+        const now = new Date();
+        const dateString = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const timeString = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+
+        // בניית אובייקט אימון שלם
+        const workoutEntry = {
+            id: Date.now(),
+            date: dateString,
+            time: timeString,
+            flat: flatW && flatR ? { weight: flatW, reps: flatR, calc1RM: calculate1RM(flatW, flatR) } : null,
+            incline: incW && incR ? { weight: incW, reps: incR, calc1RM: calculate1RM(incW, incR) } : null,
+            manualMaxFlat: maxFlatVal || null,
+            manualMaxIncline: maxIncVal || null
+        };
+
+        const transaction = db.transaction(["workouts"], "readwrite");
+        const store = transaction.objectStore("workouts");
+        store.add(workoutEntry);
+
+        transaction.oncomplete = function() {
+            // איפוס הטופס
+            document.getElementById('workoutForm').reset();
+            loadData();
+        };
+    }
+
+    function loadData() {
+        if (!db) return;
+        const transaction = db.transaction(["workouts"], "readonly");
+        const store = transaction.objectStore("workouts");
+        const getAllRequest = store.getAll();
+
+        getAllRequest.onsuccess = function() {
+            const workouts = getAllRequest.result.sort((a, b) => b.id - a.id);
+            displayWorkouts(workouts);
+            updateRecords(workouts);
+        };
+    }
+
+    function displayWorkouts(workouts) {
+        const container = document.getElementById('logsContainer');
+        if (workouts.length === 0) {
+            container.innerHTML = '<div class="empty-state">אין עדיין אימונים ברשימה. תן בראש!</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        workouts.forEach(workout => {
+            let exercisesHtml = '';
+
+            if (workout.flat) {
+                exercisesHtml += `
+                    <div class="exercise-row">
+                        <span class="exercise-name"><span class="dot dot-flat"></span>שיפוע רגיל</span>
+                        <span class="exercise-result">${workout.flat.weight} <span>ק"ג</span> &times; ${workout.flat.reps} <span>חזרות</span></span>
+                    </div>`;
+            }
+            if (workout.incline) {
+                exercisesHtml += `
+                    <div class="exercise-row">
+                        <span class="exercise-name"><span class="dot dot-incline"></span>שיפוע חיובי</span>
+                        <span class="exercise-result">${workout.incline.weight} <span>ק"ג</span> &times; ${workout.incline.reps} <span>חזרות</span></span>
+                    </div>`;
+            }
+            if (workout.manualMaxFlat) {
+                exercisesHtml += `
+                    <div class="exercise-row" style="color: var(--accent-max)">
+                        <span class="exercise-name"><span class="dot dot-max"></span>שיאו חזרה 1 (רגיל)</span>
+                        <span class="exercise-result">${workout.manualMaxFlat} <span>ק"ג</span> 🔥</span>
+                    </div>`;
+            }
+            if (workout.manualMaxIncline) {
+                exercisesHtml += `
+                    <div class="exercise-row" style="color: var(--accent-max)">
+                        <span class="exercise-name"><span class="dot dot-max"></span>שיא חזרה 1 (חיובי)</span>
+                        <span class="exercise-result">${workout.manualMaxIncline} <span>ק"ג</span> 🔥</span>
+                    </div>`;
+            }
+
+            container.innerHTML += `
+                <div class="workout-card">
+                    <div class="workout-header">
+                        <span class="workout-date">אימון ב-${workout.date}</span>
+                        <span>${workout.time}</span>
+                    </div>
+                    ${exercisesHtml}
+                </div>`;
+        });
+    }
+
+    function updateRecords(workouts) {
+        let maxFlat = 0;
+        let maxIncline = 0;
+
+        workouts.forEach(workout => {
+            // בדיקת שיפוע רגיל (חישוב או ידני)
+            if (workout.flat && workout.flat.calc1RM > maxFlat) maxFlat = workout.flat.calc1RM;
+            if (workout.manualMaxFlat && workout.manualMaxFlat > maxFlat) maxFlat = workout.manualMaxFlat;
+
+            // בדיקת שיפוע חיובי (חישוב או ידני)
+            if (workout.incline && workout.incline.calc1RM > maxIncline) maxIncline = workout.incline.calc1RM;
+            if (workout.manualMaxIncline && workout.manualMaxIncline > maxIncline) maxIncline = workout.manualMaxIncline;
+        });
+
+        document.getElementById('maxFlat').innerHTML = `${maxFlat.toFixed(1)} <span>ק"ג</span>`;
+        document.getElementById('maxIncline').innerHTML = `${maxIncline.toFixed(1)} <span>ק"ג</span>`;
+    }
+
+    function clearAll() {
+        if (confirm('למחוק את כל היסטוריית האימונים שלך לצמיתות?')) {
+            const transaction = db.transaction(["workouts"], "readwrite");
+            const store = transaction.objectStore("workouts");
+            store.clear().onsuccess = function() {
+                loadData();
+            };
+        }
+    }
+</script>
+</body>
+</html>
